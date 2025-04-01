@@ -6,6 +6,7 @@ import { CAMPSITES } from '../shared/campsites';
 import { PROMOTIONS } from '../shared/promotions';
 import { PARTNERS } from '../shared/partners';
 
+
 const FeaturedItem = ({ item }) => {
     if (item) {
         return (
