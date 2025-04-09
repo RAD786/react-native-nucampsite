@@ -1,7 +1,10 @@
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text, View, Button, Modal } from 'react-native';
+import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import RenderCampsite from '../features/campsites/RenderCampsite';
+import { Rating, Input, Icon } from 'react-native-elements';
+import RenderCampsite from '../features/campsites/RenderCampsites';
 import { toggleFavorite } from '../features/favorites/favoritesSlice';
+import { postComment } from '../features/comments/commentsSlice';
 
 const CampsiteInfoScreen = ({ route }) => {
     const { campsite } = route.params;
@@ -9,11 +12,32 @@ const CampsiteInfoScreen = ({ route }) => {
     const favorites = useSelector((state) => state.favorites);
     const dispatch = useDispatch();
 
+    const [showModal, setShowModal] = useState(false);
+    const [rating, setRating] = useState(5);
+    const [author, setAuthor] = useState('');
+    const [text, setText] = useState('');
+
+    const handleSubmit = () => {
+        const newComment = {
+            author,
+            rating,
+            text,
+            campsiteId: campsite.id
+        };
+        dispatch(postComment(newComment));
+        setShowModal(!showModal);
+    };
+
     const renderCommentItem = ({ item }) => {
         return (
             <View style={styles.commentItem}>
                 <Text style={{ fontSize: 14 }}>{item.text}</Text>
-                <Text style={{ fontSize: 12 }}>{item.rating} Stars</Text>
+                <Rating
+                    startingValue={item.rating}
+                    imageSize={10}
+                    readonly
+                    style={{ alignItems: 'flex-start', paddingVertical: '5%' }}
+                />
                 <Text style={{ fontSize: 12 }}>
                     {`-- ${item.author}, ${item.date}`}
                 </Text>
@@ -22,27 +46,94 @@ const CampsiteInfoScreen = ({ route }) => {
     };
 
     return (
-        <FlatList
-            data={comments.commentsArray.filter(
-                (comment) => comment.campsiteId === campsite.id
-            )}
-            renderItem={renderCommentItem}
-            keyExtractor={(item) => item.id.toString()}
-            contentContainerStyle={{
-                marginHorizontal: 20,
-                paddingVertical: 20
-            }}
-            ListHeaderComponent={
-                <>
-                    <RenderCampsite
-                        campsite={campsite}
-                        isFavorite={favorites.includes(campsite.id)}
-                        markFavorite={() => dispatch(toggleFavorite(campsite.id))}
+        <>
+            <FlatList
+                data={comments.commentsArray.filter(
+                    (comment) => comment.campsiteId === campsite.id
+                )}
+                renderItem={renderCommentItem}
+                keyExtractor={(item) => item.id.toString()}
+                contentContainerStyle={{
+                    marginHorizontal: 20,
+                    paddingVertical: 20
+                }}
+                ListHeaderComponent={
+                    <>
+                        <RenderCampsite
+                            campsite={campsite}
+                            isFavorite={favorites.includes(campsite.id)}
+                            markFavorite={() => dispatch(toggleFavorite(campsite.id))}
+                            onShowModal={() => setShowModal(!showModal)}
+                        />
+                        <Text style={styles.commentsTitle}>Comments</Text>
+                    </>
+                }
+            />
+            <Modal
+                animationType='slide'
+                transparent={false}
+                visible={showModal}
+                onRequestClose={() => setShowModal(!showModal)}
+            >
+                <View style={styles.modal}>
+                    <Rating
+                        showRating
+                        startingValue={rating}
+                        imageSize={40}
+                        onFinishRating={(rating) => setRating(rating)}
+                        style={{ paddingVertival: 10 }}
                     />
-                    <Text style={styles.commentsTitle}>Comments</Text>
-                </>
-            }
-        />
+                    <Input 
+                        placeholder='Author'
+                        leftIcon={
+                            <Icon  
+                                name='user-o'
+                                type='font-awesome'
+                                size={24}
+                                color='black'
+                            />
+                        }
+                        leftIconContainerStyle={{ paddingRight: 10 }}
+                        onChangeText={(authorText) => setAuthor(authorText)}
+                        value={author}
+                    />
+                    <Input 
+                        placeholder='Comment'
+                        leftIcon={
+                            <Icon
+                                name='comment-o'
+                                type='font-awesome'
+                                size={24}
+                                color='black'
+                            />
+                        }
+                        leftIconContainerStyle={{ paddingRight: 10 }}
+                        onChangeText={(text) => setText(text)}
+                        value={text}
+
+                    />
+                    <View style={{ margin: 10 }}>
+                        <Button
+                            onPress={() => {
+                                handleSubmit();
+                                resetForm();
+                            }}
+                            color='5637DD'
+                            title='submit'
+                        />
+                    </View>
+                    <View style={{ margin: 10 }}>
+                        <Button
+                            onPress={() => setShowModal(!showModal)}
+                            color='#808080'
+                            title='cancel'
+                        />
+                    </View>
+
+                </View>
+            </Modal>
+        </>
+
     );
 };
 
@@ -60,6 +151,10 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         paddingHorizontal: 20,
         backgroundColor: '#fff'
+    },
+    modal: {
+        justifyContent: 'center',
+        margin: 20
     }
 });
 

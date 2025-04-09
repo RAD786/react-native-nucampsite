@@ -1,4 +1,4 @@
-import { FlatList, Text, View } from 'react-native';
+import { FlatList, Text, View, StyleSheet } from 'react-native';
 import { Tile } from 'react-native-elements';
 import { useSelector } from 'react-redux';
 import { baseUrl } from '../shared/baseUrl';
@@ -28,6 +28,7 @@ const DirectoryScreen = ({ navigation }) => {
                     navigation.navigate('CampsiteInfo', { campsite })
                 }
                 imageSrc={{ uri: baseUrl + campsite.image }}
+                containerStyle={styles.tileContainer}
             />
         );
     };
@@ -39,5 +40,12 @@ const DirectoryScreen = ({ navigation }) => {
         />
     );
 };
+
+const styles = StyleSheet.create({
+    tileContainer: {
+        borderWidth: 2,
+        borderColor: '#5637DD',
+    }
+});
 
 export default DirectoryScreen;
