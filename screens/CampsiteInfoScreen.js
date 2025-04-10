@@ -2,6 +2,7 @@ import { FlatList, StyleSheet, Text, View, Button, Modal } from 'react-native';
 import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Rating, Input, Icon } from 'react-native-elements';
+import * as Animatable from 'react-native-animatable';
 import RenderCampsite from '../features/campsites/RenderCampsites';
 import { toggleFavorite } from '../features/favorites/favoritesSlice';
 import { postComment } from '../features/comments/commentsSlice';
@@ -46,7 +47,11 @@ const CampsiteInfoScreen = ({ route }) => {
     };
 
     return (
-        <>
+        <Animatable.View
+            animation='fadeInUp'
+            duration={2000}
+            delay={1000}
+        >
             <FlatList
                 data={comments.commentsArray.filter(
                     (comment) => comment.campsiteId === campsite.id
@@ -132,7 +137,7 @@ const CampsiteInfoScreen = ({ route }) => {
 
                 </View>
             </Modal>
-        </>
+        </Animatable.View>
 
     );
 };
